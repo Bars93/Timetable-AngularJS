@@ -1,13 +1,16 @@
 <!DOCTYPE html>
-<html ng-app>
+<html ng-app lang="ru">
 <head>
     <title>Welcome to AngularJS</title>
+    <meta charset="UTF-8">
     <script type="text/javascript" src="js/angular.js"></script>
-    <script type="text/javascript" src="js/i18n/angular-locale_ru-ru.js"></script>
-    <script>
+   <script type="text/javascript" src="js/i18n/angular-locale_ru-ru.js"></script>
+    <script type="text/javascript" src="js/apps/core.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/common.css">
+    <script type="text/javascript">
         <!--
         function Clock($scope) {
-            $scope.currentTime = newDate();
+            $scope.currentTime = new Date();
         }
                 //-->
     </script>
@@ -15,7 +18,7 @@
 <body>
 <h1>Hello, World.</h1>
 <p ng-controller='Clock'>
-    The current time is {{currentTime | date:'h:mm:ss a'}}.
-<p>
+    Сегодня - {{currentTime | date: 'EEEE, d MMMM yyyy г. Время: H:mm:ss' }}.
+</p>
 </body>
 </html>
