@@ -1,0 +1,30 @@
+h1.mainhdr {
+    color: green;
+    font-size: 3em;
+    font-weight: bold;
+    font-style: italic;
+    margin-bottom: 20px;
+}
+.row {
+    width: auto !important;
+}
+div.days, div.subjects, div.edit-day {
+    padding: 5px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    box-shadow:  0px 0px 12px rgba(91,96,247,1);
+    -moz-box-shadow:  0px 0px 12px rgba(91,96,247,1);
+    -webkit-box-shadow: 0px 0px 12px rgba(91,96,247,1);
+}
+#col-subject {
+   width: auto;
+}
+#check-subject {
+    width: 10px;
+}
+div.day {
+    width: auto;
+}
+#subj-filter {
+    margin-bottom: 10px;
+}
