@@ -5,7 +5,7 @@ h1.mainhdr {
     font-style: italic;
     margin-bottom: 20px;
 }
-.row {
+.row, .edit-table-container {
     width: auto !important;
 }
 div.days, div.subjects, div.edit-day {
@@ -19,12 +19,34 @@ div.days, div.subjects, div.edit-day {
 #col-subject {
    width: auto;
 }
-#check-subject {
+#check-subject, .delete-subject, #subj-position {
     width: 10px;
+}
+.daytime-col {
+    width: 25%;
 }
 div.day {
     width: auto;
 }
 #subj-filter {
     margin-bottom: 10px;
+}
+div.table-config {
+    width: auto;
+}
+table.daytable {
+    padding: 5px;
+    margin-bottom: 15px;
+}
+.editbtns {
+    margin-bottom: 10px;
+    margin-right: 8%;
+}
+div#editorBody {
+   margin-top: 10px;
+   padding: 10px;
+    box-sizing: content-box;
+}
+div.daytime {
+    font-size: smaller;
 }

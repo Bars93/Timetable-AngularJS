@@ -3,21 +3,18 @@
 <head>
     <title>Расписание занятий</title>
     <meta charset="UTF-8">
+    <!-- Include libraries jQuery, Bootstrap & AngularJS -->
     <script type="text/javascript" src="js/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="js/bootstrap.js"></script>
     <script type="text/javascript" src="js/angular.js"></script>
+    <script type="text/javascript" src="js/angular-resource.js"></script>
     <script type="text/javascript" src="js/i18n/angular-locale_ru-ru.js"></script>
+    <!-- AngularJS application and it`s modules -->
     <script type="text/javascript" src="js/apps/core.js"></script>
     <script type="text/javascript" src="js/apps/filters.js"></script>
+    <!-- Bootstrap's CSS and author's CSS -->
     <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="css/common.css">
-    <script type="text/javascript" src="js/bootstrap.js"></script>
-    <!--[if gte IE 9]>
-    <style type="text/css">
-        .gradient {
-            filter: none;
-        }
-    </style>
-    <![endif]-->
 </head>
 <body class="container">
 <div class="row header">
@@ -25,20 +22,21 @@
         <h1 class="mainhdr">Расписание занятий</h1>
     </div>
 </div>
-
-<div class="row">
-    <div class="col-md-4 days" ng-controller="timetableCtrl">
+<div class="row" ng-controller="timetableCtrl">
+    {{ initTTable() }}
+    <div class="col-md-4 days">
         <div class="container day" ng-repeat="day in days">
-            <table class="table table-hover">
+            <table class="table table-hover table-bordered daytable">
                 <thead>
                 <tr>
-                    <th>
-                        {{day.name}}
-                    </th>
+                    <th class="daytime-col" colspan="2"><div class="text-center">{{day.name}}</div></th>
                 </tr>
                 </thead>
                 <tbody>
                 <tr ng-repeat="subject in day.daysubjects">
+                    <td class="daytime-col">
+                        <div class="daytime">{{timePairs[$index]}}</div>
+                    </td>
                     <td>
                         {{subject.name}}
                     </td>
@@ -47,16 +45,26 @@
             </table>
             <div class="row">
                 <div class="pull-right" class="text-right">
-                    <input type="button" class="btn btn-sm btn-primary" value="Редактировать">
-                    <input type="button" class="btn btn-sm btn-primary" value="Очистить" ng-click="day.daysubjects=[]">
+                    <div class="btn-group btn-group-sm editbtns">
+                        <input type="button" class="btn btn-sm btn-primary" value="Редактировать"
+                               ng-click="showeditor(day)">
+                        <input type="button" class="btn btn-sm btn-warning" value="Очистить"
+                               ng-click="clear_confirm(day)">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-7 col-xs-offset-1" ng-controller="timetableCtrl">
+    <div class="col-md-6 col-xs-offset-1 edit-col">
         <div class="subjects row">
-            <div class="text-left">
-                <input type="text" placeholder="поиск..." ng-model="subjfilter" id="subj-filter">
+            <div class="container table-config">
+                <div class="text-left pull-left">
+                    <input type="text" placeholder="поиск..." ng-model="subjfilter" id="subj-filter">
+                </div>
+                <div class="text-right pull-right">
+                    <select id="pageSize" ng-click="changePaging()" ng-model="pageSize"
+                            ng-options="i for i in pagingValues"></select>
+                </div>
             </div>
             <table class="table table-bordered table-hover">
                 <thead>
@@ -65,33 +73,81 @@
                     <th id="col-subject">
                         Предмет
                     </th>
+                    <th id="delete-subject"></th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="subject in data | startFrom:curPage*pageSize | limitTo: pageSize"
+                <tr ng-repeat="subject in subjects | filter:subjfilter | startFrom: curPage*pageSize | limitTo: pageSize "
                     ng-class="{'active': subject.selected}">
                     <td><input type="checkbox" ng-model="subject.selected"></td>
-                    <td>{{subject}}</td>
+                    <td><a href="#" title="Добавить предмет '{{subject.name}} в расписание'" ng-click="addSubject(subject)">{{subject.name}}</a></td>
+                    <td>[<a href="#" ng-click="subjects.splice($index,1)"
+                            title="Удалить предмет '{{subject.name}}'">X</a>]
+                    </td>
                 </tr>
                 </tbody>
             </table>
-            <div class="text-center" ng-if="subjects.length >= pageSize">
+            <div class="text-center" ng-show="subjects.length > pageSize">
                 <input type="button" ng-disabled="curPage == 0" ng-click="curPage=curPage-1" value="<<"
                        class="btn btn-sm btn-link">
                 {{curPage+1}} / {{NumberOfPages()}}
                 <input type="button" value=">>" class="btn btn-sm btn-link"
-                       ng-disabled="curPage >= data.length/pageSize - 1" ng-click="curPage=curPage+1">
-                CurPage*pageSize = {{curPage * pageSize }}
+                       ng-disabled="curPage >= subjects.length/pageSize - 1" ng-click="curPage=curPage+1">
             </div>
             <div class="text-center">
-                <input type="button" value="Добавить" class="btn btn-primary">
+                <div class="btn-group">
+                    <input type="button" value="Добавить предмет" class="btn btn-primary">
+                    <input type="button" value="Составить расписание" class="btn btn-primary">
+                    <input type="button" value="Удалить предметы" class="btn btn-warning">
+                </div>
             </div>
         </div>
-        <div class="edit-day row hide" id="day_editor">
+        <div class="edit-day row" id="day_editor" ng-show="editProcessing">
+            <div class="row">
+                <div class="text-center">
+                    <select ng-options="i for i in dayNames" ng-model="editDay.name">
+                    </select>
+                </div>
+            </div>
+            <div class="row" id="editorBody">
+                <div class="container edit-table-container"><div class="text-center">
+                    <table class="table table-bordered table-hover table-config">
+                        <thead>
+                        <tr>
+                            <th id="subj-position">
+                                Позиция
+                            </th>
+                            <th>
+                                Предмет
+                            </th>
+                            <th class="delete-subject">
+
+                            </th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr ng-repeat="subject in editDay.daysubjects">
+                            <td><select ng-options="i for i in [0,1,2,3,4,5,6,7]" ng-model="subject.position">
+
+                            </select></td>
+                            <td>{{subject.name}}</td>
+                            <td>[<a href="#" title="Удалить предмет '{{subject.name}}' из расписания"
+                                    ng-click="editDay.daysubjects.splice($index,1)">X</a>]
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <div class="btn-group">
+                    <input type="button" class="btn btn-primary" value="Сохранить в расписании" ng-click="saveDay()">
+                    <input type="button" class="btn btn-primary" value="Создать расписание" ng-click="createTTable()">
+                    </div>
+                    <input type="button" class="btn btn-info" value="Show object" ng-click="showday()">
+                </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
-
 <footer>
     <div class="row">
         <div class="text-center">
