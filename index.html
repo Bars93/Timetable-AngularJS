@@ -4,14 +4,15 @@
     <title>Расписание занятий</title>
     <meta charset="UTF-8">
     <!-- Include libraries jQuery, Bootstrap & AngularJS -->
-    <script type="text/javascript" src="js/jquery-1.10.2.js"></script>
-    <script type="text/javascript" src="js/bootstrap.js"></script>
-    <script type="text/javascript" src="js/angular.js"></script>
-    <script type="text/javascript" src="js/angular-resource.js"></script>
-    <script type="text/javascript" src="js/i18n/angular-locale_ru-ru.js"></script>
+    <script type="text/javascript" src="lib/jQuery/jquery-1.10.2.js"></script>
+    <script type="text/javascript" src="lib/Bootstrap/bootstrap.js"></script>
+    <script type="text/javascript" src="lib/AngularJS/angular.js"></script>
+    <script type="text/javascript" src="lib/AngularJS/angular-resource.js"></script>
+    <script type="text/javascript" src="lib/AngularJS/i18n/angular-locale_ru-ru.js"></script>
     <!-- AngularJS application and it`s modules -->
-    <script type="text/javascript" src="js/apps/core.js"></script>
-    <script type="text/javascript" src="js/apps/filters.js"></script>
+    <script type="text/javascript" src="js/app/core.js"></script>
+    <script type="text/javascript" src="js/app/filters.js"></script>
+    <script type="text/javascript" src="js/app/services.js"></script>
     <!-- Bootstrap's CSS and author's CSS -->
     <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="css/common.css">
@@ -23,10 +24,17 @@
     </div>
 </div>
 <div class="row" ng-controller="timetableCtrl">
-    {{ initTTable() }}
     <div class="col-md-4 days">
+        <div class="container">
+            <div class="btn-group btn-group-sm">
+                <input type="button" class="btn btn-primary btn-sm" value="Load" ng-click="loadDaysData()">
+                <input type="button" class="btn btn-primary btn-sm" value="Save" ng-click="saveDaysData()">
+
+            </div>
+        </div>
         <div class="container day" ng-repeat="day in days">
-            <table class="table table-hover table-bordered daytable">
+
+            <table class="table table-hover daytable">
                 <thead>
                 <tr>
                     <th class="daytime-col" colspan="2"><div class="text-center">{{day.name}}</div></th>
@@ -39,6 +47,7 @@
                     </td>
                     <td>
                         {{subject.name}}
+
                     </td>
                 </tr>
                 </tbody>
@@ -77,11 +86,11 @@
                 </tr>
                 </thead>
                 <tbody>
-                <tr ng-repeat="subject in subjects | filter:subjfilter | startFrom: curPage*pageSize | limitTo: pageSize "
+                <tr ng-repeat="subject in subjects  | startFrom: curPage*pageSize | limitTo: pageSize | filter:subjfilter"
                     ng-class="{'active': subject.selected}">
-                    <td><input type="checkbox" ng-model="subject.selected"></td>
-                    <td><a href="#" title="Добавить предмет '{{subject.name}} в расписание'" ng-click="addSubject(subject)">{{subject.name}}</a></td>
-                    <td>[<a href="#" ng-click="subjects.splice($index,1)"
+                    <td><input type="checkbox" ng-model="subject.selected" ng-disabled="addingActive == false"></td>
+                    <td><a title="Добавить предмет '{{subject.name}} в расписание'" ng-click="addSubject(subject)">{{subject.name}}</a></td>
+                    <td>[<a ng-click="subjects.splice($index,1)"
                             title="Удалить предмет '{{subject.name}}'">X</a>]
                     </td>
                 </tr>
@@ -94,6 +103,11 @@
                 <input type="button" value=">>" class="btn btn-sm btn-link"
                        ng-disabled="curPage >= subjects.length/pageSize - 1" ng-click="curPage=curPage+1">
             </div>
+            <div class="container" id="subj-sel-info" ng-if="editProcessing">
+                <div class="text-center">
+                    <small>Свободно для добавления <b>{{ limit - getSelectedSubjectsCount()}}</b></small>
+                </div>
+            </div>
             <div class="text-center">
                 <div class="btn-group">
                     <input type="button" value="Добавить предмет" class="btn btn-primary">
@@ -102,11 +116,12 @@
                 </div>
             </div>
         </div>
-        <div class="edit-day row" id="day_editor" ng-show="editProcessing">
+        <div class="edit-day row" id="day_editor" ng-if="editProcessing">
             <div class="row">
                 <div class="text-center">
                     <select ng-options="i for i in dayNames" ng-model="editDay.name">
                     </select>
+
                 </div>
             </div>
             <div class="row" id="editorBody">
@@ -127,11 +142,11 @@
                         </thead>
                         <tbody>
                         <tr ng-repeat="subject in editDay.daysubjects">
-                            <td><select ng-options="i for i in [0,1,2,3,4,5,6,7]" ng-model="subject.position">
+                            <td><select ng-options="i for i in [1,2,3,4,5,6,7]" ng-model="subject.position">
 
                             </select></td>
                             <td>{{subject.name}}</td>
-                            <td>[<a href="#" title="Удалить предмет '{{subject.name}}' из расписания"
+                            <td>[<a title="Удалить предмет '{{subject.name}}' из расписания"
                                     ng-click="editDay.daysubjects.splice($index,1)">X</a>]
                             </td>
                         </tr>

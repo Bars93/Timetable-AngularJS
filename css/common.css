@@ -5,48 +5,56 @@ h1.mainhdr {
     font-style: italic;
     margin-bottom: 20px;
 }
+
+a:hover {
+    cursor: pointer;
+}
+
 .row, .edit-table-container {
     width: auto !important;
 }
+
 div.days, div.subjects, div.edit-day {
     padding: 5px;
     margin-bottom: 10px;
     border-radius: 10px;
-    box-shadow:  0px 0px 12px rgba(91,96,247,1);
-    -moz-box-shadow:  0px 0px 12px rgba(91,96,247,1);
-    -webkit-box-shadow: 0px 0px 12px rgba(91,96,247,1);
+    box-shadow: 0px 0px 12px rgba(91, 96, 247, 1);
+    -moz-box-shadow: 0px 0px 12px rgba(91, 96, 247, 1);
+    -webkit-box-shadow: 0px 0px 12px rgba(91, 96, 247, 1);
 }
-#col-subject {
-   width: auto;
+
+#col-subject, div.day,div.table-config, div#subj-sel-info {
+    width: auto;
 }
+
 #check-subject, .delete-subject, #subj-position {
     width: 10px;
 }
+
 .daytime-col {
     width: 25%;
 }
-div.day {
-    width: auto;
-}
+
 #subj-filter {
     margin-bottom: 10px;
 }
-div.table-config {
-    width: auto;
-}
+
 table.daytable {
     padding: 5px;
     margin-bottom: 15px;
 }
+
 .editbtns {
     margin-bottom: 10px;
     margin-right: 8%;
 }
+
 div#editorBody {
-   margin-top: 10px;
-   padding: 10px;
+    margin-top: 10px;
+    padding: 10px;
     box-sizing: content-box;
 }
+
 div.daytime {
     font-size: smaller;
 }
