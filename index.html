@@ -13,119 +13,215 @@
     <script type="text/javascript" src="js/app/core.js"></script>
     <script type="text/javascript" src="js/app/filters.js"></script>
     <script type="text/javascript" src="js/app/services.js"></script>
+    <!-- Include jQuery validation script-->
+    <script type="text/javascript" src="js/jquery.checkinput.js"></script>
     <!-- Bootstrap's CSS and author's CSS -->
     <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="css/common.css">
 </head>
 <body class="container">
+<!--  Header of page -->
 <div class="row header">
     <div class="col-md-6 text-center col-md-offset-3">
         <h1 class="mainhdr">Расписание занятий</h1>
     </div>
 </div>
+<!-- main content -->
 <div class="row" ng-controller="timetableCtrl">
-    <div class="col-md-4 days">
-        <div class="container">
-            <div class="btn-group btn-group-sm">
-                <input type="button" class="btn btn-primary btn-sm" value="Load" ng-click="loadDaysData()">
-                <input type="button" class="btn btn-primary btn-sm" value="Save" ng-click="saveDaysData()">
-
+<!-- Days column, bind with days array of objects-->
+<div class="col-md-4 days">
+    <div class="row">
+        <div class="text-center">
+            <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown">
+                    Загрузка/сохранение <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a ng-click="loadDaysData()">Загрузка</a></li>
+                    <li><a ng-click="saveDaysData()">Сохранение</a></li>
+                </ul>
             </div>
         </div>
-        <div class="container day" ng-repeat="day in days">
+    </div>
+    <div class="container day" ng-repeat="day in days track by $index">
 
-            <table class="table table-hover daytable">
-                <thead>
-                <tr>
-                    <th class="daytime-col" colspan="2"><div class="text-center">{{day.name}}</div></th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="subject in day.daysubjects">
-                    <td class="daytime-col">
-                        <div class="daytime">{{timePairs[$index]}}</div>
-                    </td>
-                    <td>
-                        {{subject.name}}
+        <table class="table table-hover daytable">
+            <thead>
+            <tr>
+                <th class="daytime-col" colspan="2">
+                    <div class="text-center">{{day.name}}</div>
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="subject in day.daysubjects">
+                <td class="daytime-col">
+                    <div class="daytime">{{timePairs[$index]}}</div>
+                </td>
+                <td>
+                    {{subject.name}}
 
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="row">
-                <div class="pull-right" class="text-right">
-                    <div class="btn-group btn-group-sm editbtns">
-                        <input type="button" class="btn btn-sm btn-primary" value="Редактировать"
-                               ng-click="showeditor(day)">
-                        <input type="button" class="btn btn-sm btn-warning" value="Очистить"
-                               ng-click="clear_confirm(day)">
-                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="row">
+            <div class="pull-right text-right">
+                <div class="btn-group btn-group-sm editbtns">
+                    <input type="button" class="btn btn-sm btn-primary" value="Редактировать"
+                           ng-click="showeditor(day)">
+                    <input type="button" class="btn btn-sm btn-warning" value="Очистить"
+                           ng-click="clear_confirm(day)">
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-md-6 col-xs-offset-1 edit-col">
-        <div class="subjects row">
-            <div class="container table-config">
-                <div class="text-left pull-left">
-                    <input type="text" placeholder="поиск..." ng-model="subjfilter" id="subj-filter">
-                </div>
-                <div class="text-right pull-right">
-                    <select id="pageSize" ng-click="changePaging()" ng-model="pageSize"
-                            ng-options="i for i in pagingValues"></select>
+</div>
+<!--Modal dialog for add new subject-->
+<div class="modal fade" id="addSubjModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
+     aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Добавить предмет</h4>
+            </div>
+            <div class="modal-body">
+                <form name="newSubj">
+                    <div class="input-group">
+                        <span class="input-group-addon">
+                            Название предмета:
+                        </span>
+                        <input type="text" id="newNameInput" name="newNameInput" ng-model="new_name"
+                               class="form-control">
+                        <script type="text/javascript">
+                            <!--
+                            $("#newNameInput").checkinput();
+                            //-->
+                        </script>
+                    </div>
+                </form>
+                <div class="panel panel-warning">
+                    <div class="panel-title">
+                        Предупреждение
+                    </div>
+                    <div class="panel-body">
+                        Все символы кроме символов русского и английского алфавитов, а также кроме пробельных символов и
+                        символов +, -, _ будут удалены!!!
+                    </div>
                 </div>
             </div>
-            <table class="table table-bordered table-hover">
-                <thead>
-                <tr>
-                    <th id="check-subject"></th>
-                    <th id="col-subject">
-                        Предмет
-                    </th>
-                    <th id="delete-subject"></th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr ng-repeat="subject in subjects  | startFrom: curPage*pageSize | limitTo: pageSize | filter:subjfilter"
-                    ng-class="{'active': subject.selected}">
-                    <td><input type="checkbox" ng-model="subject.selected" ng-disabled="addingActive == false"></td>
-                    <td><a title="Добавить предмет '{{subject.name}} в расписание'" ng-click="addSubject(subject)">{{subject.name}}</a></td>
-                    <td>[<a ng-click="subjects.splice($index,1)"
-                            title="Удалить предмет '{{subject.name}}'">X</a>]
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="text-center" ng-show="subjects.length > pageSize">
-                <input type="button" ng-disabled="curPage == 0" ng-click="curPage=curPage-1" value="<<"
-                       class="btn btn-sm btn-link">
-                {{curPage+1}} / {{NumberOfPages()}}
-                <input type="button" value=">>" class="btn btn-sm btn-link"
-                       ng-disabled="curPage >= subjects.length/pageSize - 1" ng-click="curPage=curPage+1">
-            </div>
-            <div class="container" id="subj-sel-info" ng-if="editProcessing">
-                <div class="text-center">
-                    <small>Свободно для добавления <b>{{ limit - getSelectedSubjectsCount()}}</b></small>
-                </div>
-            </div>
-            <div class="text-center">
-                <div class="btn-group">
-                    <input type="button" value="Добавить предмет" class="btn btn-primary">
-                    <input type="button" value="Составить расписание" class="btn btn-primary">
-                    <input type="button" value="Удалить предметы" class="btn btn-warning">
-                </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal" ng-click="new_name=''">Закрыть
+                </button>
+                <button type="button" class="btn btn-primary" ng-click="newSubject()">
+                    Создать предмет
+                </button>
             </div>
         </div>
-        <div class="edit-day row" id="day_editor" ng-if="editProcessing">
-            <div class="row">
-                <div class="text-center">
-                    <select ng-options="i for i in dayNames" ng-model="editDay.name">
-                    </select>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+<!--Subject column content-->
+<div class="col-md-6 col-xs-offset-1 edit-col">
+    <!--Subjects list-->
+    <div class="subjects row">
+        <div class="container table-config">
+            <div class="text-left pull-left">
+                <input type="text" placeholder="поиск..." ng-model="subjfilter" id="subj-filter">
+            </div>
+            <div class="text-right pull-right">
+                <select id="pageSize" ng-click="changePaging()" ng-model="pageSize"
+                        ng-options="i for i in pagingValues"></select>
+            </div>
+        </div>
+        <table class="table table-bordered table-hover">
+            <thead>
+            <tr>
+                <th id="check-subject"></th>
+                <th id="col-subject">
+                    Предмет
+                </th>
+                <th id="delete-subject"></th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr ng-repeat="subject in subjects  | startFrom: curPage*pageSize | limitTo: pageSize | filter:subjfilter"
+                ng-class="{'active': subject.selected}">
+                <td><input type="checkbox" ng-model="subject.selected" ng-disabled="editProcessing == false"
+                           ng-change="checkSubject(subject)"></td>
+                <td><a title="Добавить предмет '{{subject.name}} в расписание'" ng-click="addSubject(subject)">{{subject.name}}</a>
+                </td>
+                <td>[<a ng-click="subjects.splice($index,1)"
+                        title="Удалить предмет '{{subject.name}}'">X</a>]
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="text-center" ng-show="subjects.length > pageSize">
+            <input type="button" ng-disabled="curPage == 0" ng-click="curPage=curPage-1" value="<<"
+                   class="btn btn-sm btn-link">
+            {{curPage+1}} / {{NumberOfPages()}}
+            <input type="button" value=">>" class="btn btn-sm btn-link"
+                   ng-disabled="curPage >= subjects.length/pageSize - 1" ng-click="curPage=curPage+1">
+        </div>
+        <div class="container" id="subj-sel-info" ng-if="editProcessing">
+            <div class="text-center" ng-class="{'red-text': (limit - getFreeSlotsSubjectsCount()) == 0}">
+                <small>Свободно мест для добавления <b>{{ limit - getFreeSlotsSubjectsCount()}}</b></small>
+            </div>
+        </div>
+        <div class="text-center">
+            <input type="button" value="Добавить предмет" class="btn btn-primary" data-toggle="modal"
+                   data-target="#addSubjModal" id="addSubjBtn">
 
+            <input type="button" value="Составить расписание" class="btn btn-primary"
+                   ng-click="addSelectedSubjects()" id="makeTTableBtn">
+            <input type="button" value="Удалить предметы" class="btn btn-warning" ng-click="deleteSubjects()">
+            <script type="text/javascript">
+                <!--
+                // strange error in Firefox with disabling buttons; some corrections
+                $("#addSubjBtn").removeAttr("disabled");
+                $("#makeTTableBtn").removeAttr("disabled");
+                //-->
+            </script>
+            <!-- Single button -->
+
+        </div>
+        <div class="text-center">
+            <div class="btn-group saveload">
+                <button type="button" class="btn btn-sm btn-primary dropdown-toggle" data-toggle="dropdown">
+                    Загрузка/сохранение <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    <li><a ng-click="loadSubjects()">Загрузка</a></li>
+                    <li><a ng-click="saveSubjects()">Сохранение</a></li>
+                    <li class="divider"></li>
+                    <li><a ng-click="loadFAMI_5semester()" title="Загрузка предметов 5 семестра ФПМИ">5 семестр ФПМИ</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="edit-day row" id="day_editor" ng-if="editProcessing">
+        <!--Edit timetible of day block aka "#day_editor"-->
+        <div class="container table-config">
+            <div class="text-center">
+                <select ng-options="i for i in dayNames" ng-model="editDay.name" ng-change="bindingDay()">
+                </select>
+
+                <div class="text-right pull-right">
+                    [<a ng-click="closeEditor()"
+                        title="Закрыть редактор расписания для дня {{editDay.name}}">Закрыть</a>]
                 </div>
             </div>
-            <div class="row" id="editorBody">
-                <div class="container edit-table-container"><div class="text-center">
+
+        </div>
+        <div class="row" id="editorBody">
+            <div class="container edit-table-container">
+                <div class="text-center">
                     <table class="table table-bordered table-hover table-config">
                         <thead>
                         <tr>
@@ -142,26 +238,28 @@
                         </thead>
                         <tbody>
                         <tr ng-repeat="subject in editDay.daysubjects">
-                            <td><select ng-options="i for i in [1,2,3,4,5,6,7]" ng-model="subject.position">
+                            <td><select ng-options="i for i in [1,2,3,4,5,6,7]" ng-model="subject.position"
+                                        ng-change="updateTTable()">
 
                             </select></td>
                             <td>{{subject.name}}</td>
                             <td>[<a title="Удалить предмет '{{subject.name}}' из расписания"
-                                    ng-click="editDay.daysubjects.splice($index,1)">X</a>]
+                                    ng-click="removeSubjTTable(editDay.daysubjects,$index)">X</a>]
                             </td>
                         </tr>
                         </tbody>
                     </table>
                     <div class="btn-group">
-                    <input type="button" class="btn btn-primary" value="Сохранить в расписании" ng-click="saveDay()">
-                    <input type="button" class="btn btn-primary" value="Создать расписание" ng-click="createTTable()">
+                        <input type="button" class="btn btn-primary" value="Сохранить в расписании"
+                               ng-click="saveDay()">
+                        <input type="button" class="btn btn-primary" value="Обновить расписание"
+                               ng-click="updateTTable()">
                     </div>
-                    <input type="button" class="btn btn-info" value="Show object" ng-click="showday()">
-                </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 </div>
 <footer>
     <div class="row">
